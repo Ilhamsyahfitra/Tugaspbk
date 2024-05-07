@@ -2,11 +2,13 @@
   <div id="app">
     <h1>Kegiatan hari ini</h1>
     <input v-model="newTask" @keyup.enter="addTask">
-    <button @click="addTask">tambahkan kagiatan</button>
+    <button @click="addTask">Tambahkan kegiatan</button>
     <div v-for="(task, index) in tasks" :key="index">
-      <span :class="{ completed: task.completed }">{{ task.name }}</span>
-      <button @click="toggleCompletion(index)">selesai</button>
-      <button @click="deleteTask(index)">hapus</button>
+      <span :class="{ completed: task.completed }" v-if="!task.editing">{{ task.name }}</span>
+      <input v-model="task.name" v-else @keyup.enter="saveEdit(index)">
+      <button @click="toggleCompletion(index)">{{ task.completed ? 'Batal selesai' : 'Selesai' }}</button>
+      <button @click="deleteTask(index)">Hapus</button>
+      <button @click="editTask(index)">{{ task.editing ? 'Simpan' : 'Edit' }}</button>
     </div>
     <button @click="showIncomplete">Hapus semua kegiatan selesai</button>
   </div>
@@ -22,7 +24,7 @@ export default {
   },
   methods: {
     addTask() {
-      this.tasks.push({ name: this.newTask, completed: false });
+      this.tasks.push({ name: this.newTask, completed: false, editing: false });
       this.newTask = '';
     },
     deleteTask(index) {
@@ -33,6 +35,18 @@ export default {
     },
     showIncomplete() {
       this.tasks = this.tasks.filter(task => !task.completed);
+    },
+    editTask(index) {
+      this.tasks.forEach((task, i) => {
+        if (i === index) {
+          task.editing = !task.editing;
+        } else {
+          task.editing = false;
+        }
+      });
+    },
+    saveEdit(index) {
+      this.tasks[index].editing = false;
     }
   }
 }
@@ -41,7 +55,7 @@ export default {
 <style scoped>
 .completed {
   text-decoration: line-through;
-  
+  color: #422626;
 }
 
 #app {
@@ -79,11 +93,6 @@ button:hover {
   background-color: rgba(255, 0, 0, 0.636);
 }
 
-.completed {
-  text-decoration: line-through;
-  color: #422626;
-}
-
 .activity-item {
   display: flex;
   justify-content: space-between;
@@ -95,5 +104,4 @@ button:hover {
 .activity-item:last-child {
   border-bottom: none;
 }
-
 </style>
